@@ -50,7 +50,10 @@ def process_dependencies(param_map):
             else:
                 raise Exception("Not yet defined for just conversion params")
 
-            ans.append((pi_calc["deps"].split(","), func))
+            if pi_calc["deps"] is None:
+                ans.append(([], func))
+            else:
+                ans.append((pi_calc["deps"].split(","), func))
         dependencies[param] = ans
 
     return dependencies
@@ -132,10 +135,13 @@ def run_met():
     ## For strict ordering, resulting graph must be DAGs
     ## Can used memoisation + greedy approach
     pd = process_dependencies(param_map)
-    dep_list = order_load_dep([], pd, list(dataset.keys()))
+    dep_list = order_load_dep([], pd, list(dataset.keys()) + ["none"])
 
     for param, deps, func in dep_list:
-        dep_attrs = list(map(lambda x: dataset[x], deps))
+        if deps == []:
+            dep_attrs = [dataset.coords, dataset.dims]
+        else:
+            dep_attrs = list(map(lambda x: dataset[x], deps))
         # TODO: Try just base unit conversion
         dataset[param] = func(*dep_attrs)
         dataset[param] = dataset[param].metpy.dequantify()
@@ -163,3 +169,6 @@ def run_met():
 
 if __name__ == "__main__":
     run_met()
+
+# TODO: Should met forcing data input be different for site-specific runs vs global
+# Fluxsite data compatiblity with the preprocessor output (number of files, additional variables)

@@ -25,7 +25,7 @@ def calc_psurf(temperature, elevation):
     t = temperature.to("kelvin").m
     e = elevation.to("m").m
     return (
-        1013.25 * t + (0.0065 * e) ** (c.earth_gravity.m / c.Rd.m / 0.0065)
+        1013.25 * (t / (t + 0.0065 * e)) ** (c.earth_gravity.m / c.Rd.m / 0.0065)
     ) * units("Pa")
 
 
@@ -34,3 +34,10 @@ def calc_psurf(temperature, elevation):
 def calc_snow(temperature, rain):
     t = temperature.to("kelvin").m
     return xr.where(t < T0.m, rain, 0.0, keep_attrs=True)
+
+
+def default_co2(coords, dims):
+    # 350 ppm
+    return xr.DataArray(
+        350 / 1000000, coords=coords, dims=dims, attrs={"units": "ppm"}
+    ).metpy.quantify()

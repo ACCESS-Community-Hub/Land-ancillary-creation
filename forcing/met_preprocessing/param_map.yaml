@@ -103,13 +103,13 @@ CO2air:
   type: optional
   unit:
     ppm
-  # calc:
-  #   - deps: ""
-  #     func:
-  #       cons_co2
+  calc:
+    - deps: 
+      func:
+        default_co2
 
-patchfrac:
-  type: optional
-  unit:
-    dimensionless
-    # - Tair
+# Only for flux-site runs
+# patchfrac:
+#   type: optional
+#   unit:
+#     dimensionless
