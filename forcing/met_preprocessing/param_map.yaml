@@ -104,8 +104,7 @@ CO2air:
   unit:
     ppm
   calc:
-    - deps: 
-      func:
+    - func:
         default_co2
 
 # Only for flux-site runs

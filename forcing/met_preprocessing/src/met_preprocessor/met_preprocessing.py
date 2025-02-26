@@ -4,6 +4,7 @@ import met_preprocessor.standard_param as standard_param
 import met_preprocessor.opt_param as opt_param
 from met_preprocessor.unit_conv import UnitConversion
 from met_preprocessor.utils import list_nc_files
+import itertools
 
 xr.set_options(keep_attrs=True)
 
@@ -49,19 +50,26 @@ def process_dependencies(param_map):
                 func = getattr(opt_param, pi_calc["func"])
             else:
                 raise Exception("Not yet defined for just conversion params")
-
-            if pi_calc["deps"] is None:
-                ans.append(([], func))
-            else:
-                ans.append((pi_calc["deps"].split(","), func))
+            parsed_deps = pi_calc.get("deps", "").split(",")
+            ans.append((parsed_deps, func))
         dependencies[param] = ans
 
     return dependencies
 
 
-def cycle_check(node: str, visited: dict[str, bool], adj_list: list[list[str]]):
-    if visited[node]:
+def cycle_check(node: str, visited: dict[str, bool], adj_list: dict[str, list[str]]):
+    """Cycle checks using DFS."""
+
+    # Already visited node
+    if visited.get(node):
         return True
+
+    visited[node] = True
+    res = any([cycle_check(dep, visited, adj_list) for dep in adj_list.get(node, [])])
+    if not res:
+        del visited[node]
+
+    return res
 
 
 def replace_tup(tup_list, val, new_tup):
@@ -75,8 +83,6 @@ def replace_tup(tup_list, val, new_tup):
 def order_load_dep(res, dependencies, input_list):
     """
     Given a DAG, convert which order to calculate values.
-    TODO: Cycle check - basic idea of converting list of lists into a set and checking visited
-    nodes
     Eg: input_list = {1, 3}  dependencies = {2 : [[1, 4], [1, 3]], 4 : 1}
     Here answer should be {4 : [1] , 2 : [1, 4]} based on priority
     """
@@ -90,6 +96,18 @@ def order_load_dep(res, dependencies, input_list):
                 return order_load_dep(updated_res, dependencies, input_list + [param])
     # If no extra dependencies found, then return the accumulated result
     return res
+
+
+def generate_calculations(dataset, param_map):
+    pd = process_dependencies(param_map)
+    is_cycle_chain = {
+        k: list(set(itertools.chain.from_iterable([vi[0] for vi in v])))
+        for k, v in pd.items()
+    }
+    for node in pd.keys():
+        if cycle_check(node, {}, is_cycle_chain):
+            raise Exception(f"Cycle detected near {node}")
+    return order_load_dep([], pd, list(dataset.keys()) + ["none"])
 
 
 def run_met():
@@ -134,8 +152,7 @@ def run_met():
     # Doing all possible calculations (Params)
     ## For strict ordering, resulting graph must be DAGs
     ## Can used memoisation + greedy approach
-    pd = process_dependencies(param_map)
-    dep_list = order_load_dep([], pd, list(dataset.keys()) + ["none"])
+    dep_list = generate_calculations(dataset, param_map)
 
     for param, deps, func in dep_list:
         if deps == []:
@@ -169,6 +186,3 @@ def run_met():
 
 if __name__ == "__main__":
     run_met()
-
-# TODO: Should met forcing data input be different for site-specific runs vs global
-# Fluxsite data compatiblity with the preprocessor output (number of files, additional variables)

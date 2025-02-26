@@ -16,7 +16,7 @@ def calc_lwdown_swinbank(temperature):
     https://doi.org/10.1002/qj.49708938105
     """
     t = temperature.to("kelvin").m
-    return 0.0000094 * 0.0000000567 * (t**6.0) * units("W/m^2")
+    return 5.31e-14 * (t**6.0) * units("W/m^2")
 
 
 @preprocess_and_wrap(wrap_like="temperature", broadcast=("temperature", "elevation"))
