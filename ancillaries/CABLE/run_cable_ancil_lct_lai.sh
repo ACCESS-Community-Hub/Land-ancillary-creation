@@ -32,13 +32,13 @@ if [ ! -d ${ANCIL_TARGET_PATH} ]; then
     mkdir -p ${ANCIL_TARGET_PATH}
 else 
     echo "following files exist in ${ANCIL_TARGET_PATH}"
-    ls -l ${ANCIL_TARGET_PATH}
+    ls -lhrt ${ANCIL_TARGET_PATH}
 fi
 
 # ============================================================================
 # config based on RAS (u-bu503) app/ancil_lct/rose-app.conf, walltime ~ 1 min
 source=${ANCIL_MASTER}/vegetation/cover/cci/v3/vegetation_fraction.nc
-target_grid=${INPUT_PATH}/grid.nl
+target_grid=${INPUT_PATH}/grid_cable.nl
 # transformpath=/g/data/access/TIDS/UM/ancil/data/transforms/cci2jules_ra1.json
 transformpath=${INPUT_PATH}/cci2cable.json
 output_vegfrac=${ANCIL_TARGET_PATH}/qrparm.veg.frac_cci_pre_c4_cable
@@ -54,6 +54,7 @@ ANTS_CONFIG=${INPUT_PATH}/ancil_lct-app.conf
 #   qrparm.veg.frac_cci_pre_c4.nc (intermediate file)
 #   qrparm.mask_sea.nc (unknown use)
 #   qrparm.mask.nc (land-sea mask)
+echo "running ancil_lct.py"
 python ${ANTS_SRC_PATH}/ancil_lct.py ${source} \
          --target-grid ${target_grid} --transform-path ${transformpath} \
          -o ${output_vegfrac} --landseamask-output ${output_lsm}       \
@@ -84,9 +85,10 @@ c4level=7
 #   c4_percent_1d.nc (intermediate file)
 #   qrparm.veg.frac_cci.nc (land fraction including c3 & c4 partition)
 
+echo "running ancil_general_regrid.py"
 python ${ANTS_SRC_PATH}/ancil_general_regrid.py --ants-config ${ANTS_CONFIG} \
        ${c4source} --target-lsm ${target_lsm} -o ${ANCIL_TARGET_PATH}/c4_percent_1d.nc
-
+echo "running ancil_lct_postproc_c4.py"
 python ${ANTS_SRC_PATH}/ancil_lct_postproc_c4.py \
        ${source} --islscpiic4 ${ANCIL_TARGET_PATH}/c4_percent_1d.nc \
        --c3level ${c3level} --c4level ${c4level} --use-new-saver -o ${output}
@@ -98,5 +100,6 @@ ANTS_CONFIG=${INPUT_PATH}/ancil_lai-app.conf
 target_lsm=${ANCIL_TARGET_PATH}/qrparm.mask
 
 # CABLE uses a single LAI value for each tile, so we only need to regrid MODIS
+echo "running ancil_general_regrid.py"
 python ${ANTS_SRC_PATH}/ancil_general_regrid.py --ants-config ${ANTS_CONFIG} \
        ${source} --target-lsm ${target_lsm} -o ${ANCIL_TARGET_PATH}/lai_cable.nc
