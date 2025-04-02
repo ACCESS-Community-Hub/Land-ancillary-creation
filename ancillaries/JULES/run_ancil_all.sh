@@ -31,6 +31,9 @@ ANCIL_PREPROC_PATH=/g/data/access/TIDS/RMED/ANTS/preproc
 # check if the output directory exists
 if [ ! -d ${ANCIL_TARGET_PATH} ]; then
     mkdir -p ${ANCIL_TARGET_PATH}
+else 
+    echo "removing files in ${ANCIL_TARGET_PATH}"
+    rm -f ${ANCIL_TARGET_PATH}/*
 fi
 
 # ============================================================================
