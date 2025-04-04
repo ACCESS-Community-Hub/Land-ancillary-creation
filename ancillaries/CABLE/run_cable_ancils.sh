@@ -23,7 +23,7 @@ module load ants/1.1.0
 
 ANTS_SRC_PATH=/g/data/rp23/experiments/2024-10-10_LWG_workingbee/mjl561/ants_src/ants_1p1
 ANCIL_MASTER=/g/data/access/TIDS/UM/ancil/atmos/master
-INPUT_PATH=/home/561/mjl561/git/LWG-Workshop-Day2-Scripts/ancillaries/ants_lct_inputs
+INPUT_PATH=${HOME}/git/LWG-Workshop-Day2-Scripts/ancillaries/ants_lct_inputs
 ANCIL_TARGET_PATH=/g/data/rp23/experiments/2024-10-10_LWG_workingbee/mjl561/outputs_cable
 ANCIL_PREPROC_PATH=/g/data/access/TIDS/RMED/ANTS/preproc
 
@@ -103,3 +103,26 @@ target_lsm=${ANCIL_TARGET_PATH}/qrparm.mask
 echo "running ancil_general_regrid.py"
 python ${ANTS_SRC_PATH}/ancil_general_regrid.py --ants-config ${ANTS_CONFIG} \
        ${source} --target-lsm ${target_lsm} -o ${ANCIL_TARGET_PATH}/lai_cable.nc
+
+# ============================================================================
+# convert fractional land cover to dominant (code by Lachlan Whyborn @ ACCESS-NRI)
+# uses xarray 
+
+module purge
+module use /g/data/hh5/public/modules
+module load conda/analysis3
+
+source=${ANCIL_TARGET_PATH}/qrparm.veg.frac_cci_cable.nc
+output=${ANCIL_TARGET_PATH}/qrparm.veg.dominant_cci_cable.nc
+
+python ${HOME}/git/LWG-Workshop-Day2-Scripts/ancillaries/CABLE/frac_to_dominant.py \
+       --input ${source} --output ${output}
+
+# ============================================================================
+# remove unused files
+rm ${ANCIL_TARGET_PATH}/qrparm.mask_sea*
+rm ${ANCIL_TARGET_PATH}/qrparm.mask
+rm ${ANCIL_TARGET_PATH}/qrparm.landfrac
+rm ${ANCIL_TARGET_PATH}/qrparm.veg.frac_cci_pre_c4_cable*
+rm ${ANCIL_TARGET_PATH}/qrparm.veg.frac_cci_cable
+rm ${ANCIL_TARGET_PATH}/c4_percent_1d*
