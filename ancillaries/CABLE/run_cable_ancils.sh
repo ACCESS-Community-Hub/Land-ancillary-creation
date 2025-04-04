@@ -115,7 +115,7 @@ module load conda/analysis3
 source=${ANCIL_TARGET_PATH}/qrparm.veg.frac_cci_cable.nc
 output=${ANCIL_TARGET_PATH}/qrparm.veg.dominant_cci_cable.nc
 
-python ${HOME}/git/LWG-Workshop-Day2-Scripts/ancillaries/CABLE/frac_to_dominant.py \
+python ${HOME}/git/LWG-Workshop-Day2-Scripts/ancillaries/CABLE/map_to_dominant.py \
        --input ${source} --output ${output}
 
 # ============================================================================

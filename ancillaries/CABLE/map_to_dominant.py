@@ -40,10 +40,10 @@ def convert_to_dominant(InputFile):
             "flag_values"   : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14, 15,
                                16, 17],
             "flag_meanings" : "Evergreen_Needleleaf Evergreen_Broadleaf "+\
-                              "Deciduous Needleleaf Deciduous Broadleaf "+\
+                              "Deciduous_Needleleaf Deciduous_Broadleaf "+\
                               "Shrub C3_Grassland C4_Grassland Tundra "+\
-                              "C3_Cropland C4_Cropland Wetland Barren "+\
-                              "Urban Lakes Ice",
+                              "C3_Cropland C4_Cropland Wetland Empty Empty "+\
+                              "Barren Urban Lakes Ice",
             "missing_value": -1
             }
 
