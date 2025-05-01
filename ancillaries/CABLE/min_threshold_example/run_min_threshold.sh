@@ -1,0 +1,1 @@
+python aggregate_vegetation_fractions.py -i /g/data/rp23/experiments/2024-10-10_LWG_workingbee/mjl561/outputs_cable_10km_500x400/qrparm.veg.frac_cci_cable.nc -o min_threshold_vegetation_types.nc -c min_threshold_config.json
