@@ -4,6 +4,7 @@ import met_preprocessor.standard_param as standard_param
 import met_preprocessor.opt_param as opt_param
 from met_preprocessor.unit_conv import UnitConversion
 from met_preprocessor.utils import list_nc_files
+from met_preprocessor.accu import hourly_acc
 import itertools
 
 xr.set_options(keep_attrs=True)
@@ -127,14 +128,26 @@ def run_met():
     ## TODO: Have to combine everything as provenance
     ## TODO: Look more into parameter options for open_mfdataset
     ## (correctness in merging data, parallel processing)
-    print(f"Loading combined dataset from {file_list}")
+    print(f"Loading combined dataset")
     dataset = xr.open_mfdataset(file_list, compat="override", coords="minimal")
     print("Loaded combined dataset")
+
+    dataset = dataset.sel(time=slice("1950-01-01 00:00:00", "1950-01-01 23:59:59"))
     print(dataset)
 
     # Rename parameters
     param_criteria = get_rename_param_criteria(list(dataset.keys()), param_map)
     dataset = dataset.rename(param_criteria)
+
+    print(dataset)
+    dataset["Snowf"].attrs["units"] = "m"
+    
+    dataset["Snowf"] = hourly_acc(dataset["Snowf"])
+    dataset["SWDown"] = hourly_acc(dataset["SWDown"])
+    dataset["LWDown"] = hourly_acc(dataset["LWDown"])
+    dataset["Rainf"] = hourly_acc(dataset["Rainf"])
+    print(dataset)
+
 
     # Unit conversions
     ## List of all params for unit conversions
@@ -182,7 +195,10 @@ def run_met():
 
     # Combine filtered params
     dataset.to_netcdf(config["output_file"], format="NETCDF4")
+    print("Saved dataset - Check log.txt for warnings")
 
 
 if __name__ == "__main__":
     run_met()
+
+# https://github.com/AusClimateService/axiom

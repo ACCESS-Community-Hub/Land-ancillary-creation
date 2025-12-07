@@ -1,12 +1,12 @@
 directories:
-  - /g/data/gh70/ANUClimate/v2-0/stable/month/tavg/1960/ANUClimate_v2-0_tavg_monthly_196001.nc
-  - /g/data/gh70/ANUClimate/v2-0/stable/month/rain/1960/ANUClimate_v2-0_rain_monthly_196001.nc
-  - /g/data/gh70/ANUClimate/v2-0/stable/month/srad/1960/ANUClimate_v2-0_srad_monthly_196001.nc
-  - /g/data/gh70/ANUClimate/v2-0/stable/month/vpd/1960/ANUClimate_v2-0_vpd_monthly_196001.nc
-  #  ncwa -a time -O /g/data/gh70/ANUClimate/v2-0/topogrid/dem01/ANUClimate_v2-0_dem01.nc mid.nc
-  #  ncap2 -O -s 'defdim("time",1)' mid.nc ANUClimate_v2-0_dem01.nc
-  # Actually used cdo --reduce_dim -copy /g/data/gh70/ANUClimate/v2-0/topogrid/dem01/ANUClimate_v2-0_dem01.nc ANUClimate_v2-0_dem01.nc
-  - /home/659/ag9761/ACCESS-NRI/Land-ancillary-creation/forcing/met_preprocessing/ANUClimate_v2-0_dem01.nc
-  # - /g/data/gh70/ANUClimate/v2-0/topogrid/dem01/ANUClimate_v2-0_dem01.nc
+  - /g/data/zz93/era5-land/reanalysis/ssrd/1950/ssrd_era5-land_oper_sfc_19500101-19500131.nc
+  - /g/data/zz93/era5-land/reanalysis/strd/1950/strd_era5-land_oper_sfc_19500101-19500131.nc
+  - /g/data/zz93/era5-land/reanalysis/tp/1950/tp_era5-land_oper_sfc_19500101-19500131.nc
+  - /g/data/zz93/era5-land/reanalysis/2t/1950/2t_era5-land_oper_sfc_19500101-19500131.nc
+  - /g/data/zz93/era5-land/reanalysis/sp/1950/sp_era5-land_oper_sfc_19500101-19500131.nc
+  - /g/data/zz93/era5-land/reanalysis/2d/1950/2d_era5-land_oper_sfc_19500101-19500131.nc
+  - /g/data/zz93/era5-land/reanalysis/u10/1950/u10_era5-land_oper_sfc_19500101-19500131.nc
+  - /g/data/zz93/era5-land/reanalysis/v10/1950/v10_era5-land_oper_sfc_19500101-19500131.nc
+  - /g/data/zz93/era5-land/reanalysis/sf/1950/sf_era5-land_oper_sfc_19500101-19500131.nc
 
-output_file: temp.nc
+output_file: /scratch/tm70/ag9761/temp.nc
