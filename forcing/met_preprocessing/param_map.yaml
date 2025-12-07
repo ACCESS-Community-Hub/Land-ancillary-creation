@@ -5,12 +5,14 @@ Tair:
   input_param:
     - tavg
     - temp
+    - t2m
   unit:
     kelvin
 SWDown:
   type: standard
   input_param:
     - srad
+    - ssrd
   unit:
     W m-2
 Qair:
@@ -32,23 +34,29 @@ Qair:
         vpd,Tair
       func:
         vpd_tair_sh
+    - deps:
+        PSurf,dewp
+      func:
+        sp_dewp_sh
+        
 Rainf:
   type: standard
   input_param:
     - rain
+    - tp
   unit:
     mm s-1
     # kg m-2 s-1 (JULES)
 
-  # Wind:
-  #   unit:
-  #     m s-1
-  # Wind_E:
-  #   unit:
-  #     m s-1
-  # Wind_N:
-  #   unit:
-  #     m s-1
+Wind:
+  type: standard
+  unit:
+    m s-1
+  calc:
+  - deps:
+      wind_e,wind_n
+    func:
+      wind_speed
 
 # In between params
 vpd:
@@ -56,6 +64,27 @@ vpd:
     conversion
   input_param:
     - vpd
+
+dewp:
+  type: 
+    conversion
+  input_param:
+    - d2m
+
+wind_e:
+  type: 
+    conversion
+  unit:
+    m s-1
+  input_param:
+    - u10
+wind_n:
+  type: 
+    conversion
+  unit:
+    m s-1
+  input_param:
+    - v10
 
 elevation:
   type: conversion
@@ -73,6 +102,8 @@ tmin:
 # Optional Params
 LWDown:
   type: optional
+  input_param:
+    - strd
   calc:
     - deps:
         Tair
@@ -82,6 +113,8 @@ LWDown:
     W m-2
 PSurf:
   type: optional
+  input_param:
+    - sp
   calc:
     - deps:
         Tair,elevation
@@ -93,6 +126,8 @@ Snowf:
   type: optional
   unit:
     mm s-1
+  input_param:
+    - sf
   calc:
     - deps:
         Tair,Rainf
