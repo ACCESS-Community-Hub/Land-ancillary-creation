@@ -9,4 +9,10 @@ directories:
   - /g/data/zz93/era5-land/reanalysis/v10/1950/v10_era5-land_oper_sfc_19500101-19500131.nc
   - /g/data/zz93/era5-land/reanalysis/sf/1950/sf_era5-land_oper_sfc_19500101-19500131.nc
 
-output_file: /scratch/tm70/ag9761/temp.nc
+hourly_acc:
+  - Snowf
+  - SWDown
+  - LWDown
+  - Rainf
+
+output_file: /scratch/tm70/ag9761/temp

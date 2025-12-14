@@ -4,7 +4,7 @@ import met_preprocessor.standard_param as standard_param
 import met_preprocessor.opt_param as opt_param
 from met_preprocessor.unit_conv import UnitConversion
 from met_preprocessor.utils import list_nc_files
-from met_preprocessor.accu import hourly_acc
+from met_preprocessor.accu import daily_to_hourly_acc
 import itertools
 
 xr.set_options(keep_attrs=True)
@@ -125,31 +125,28 @@ def run_met():
     for dir in config.get("directories"):
         file_list += list_nc_files(dir)
 
-    ## TODO: Have to combine everything as provenance
+    ## TODO: Have to differentiate output out by variables
     ## TODO: Look more into parameter options for open_mfdataset
-    ## (correctness in merging data, parallel processing)
     print(f"Loading combined dataset")
     dataset = xr.open_mfdataset(file_list, compat="override", coords="minimal")
     print("Loaded combined dataset")
 
-    dataset = dataset.sel(time=slice("1950-01-01 00:00:00", "1950-01-01 23:59:59"))
+    # TODO: Remove after appropriate compression
+    # dataset = dataset.sel(time=slice("1950-01-01 00:00:00", "1950-01-01 23:59:59"))
     print(dataset)
 
-    # Rename parameters
+    # 1. Rename parameters
     param_criteria = get_rename_param_criteria(list(dataset.keys()), param_map)
     dataset = dataset.rename(param_criteria)
 
-    print(dataset)
+    # 2. Hourly accumulator
     dataset["Snowf"].attrs["units"] = "m"
-    
-    dataset["Snowf"] = hourly_acc(dataset["Snowf"])
-    dataset["SWDown"] = hourly_acc(dataset["SWDown"])
-    dataset["LWDown"] = hourly_acc(dataset["LWDown"])
-    dataset["Rainf"] = hourly_acc(dataset["Rainf"])
-    print(dataset)
 
 
-    # Unit conversions
+    for v in config.get("hourly_acc"):
+        dataset[v] = daily_to_hourly_acc(dataset[v])
+
+    # 3. Unit conversions
     ## List of all params for unit conversions
     params = get_unit_conv_params(param_map)
     param_conv = UnitConversion(params)
@@ -162,7 +159,7 @@ def run_met():
         else:
             print(f"Standard Stage: Skipping {param}")
 
-    # Doing all possible calculations (Params)
+    # 4. Doing all possible calculations (Params)
     ## For strict ordering, resulting graph must be DAGs
     ## Can used memoisation + greedy approach
     dep_list = generate_calculations(dataset, param_map)
@@ -194,7 +191,18 @@ def run_met():
     print("Saving dataset")
 
     # Combine filtered params
-    dataset.to_netcdf(config["output_file"], format="NETCDF4")
+    compression_dict = {
+        'zlib': True, 
+        'complevel': 5,
+        'shuffle': True
+    }
+
+    print("Saving dataset")
+    for var in dataset.data_vars:
+        print(f"Saving var: {var}")
+        dataset[var].encoding.update(compression_dict)
+        dataset[var].to_netcdf(f"{config['output_file']}_{var}.nc", format="NETCDF4")
+
     print("Saved dataset - Check log.txt for warnings")
 
 

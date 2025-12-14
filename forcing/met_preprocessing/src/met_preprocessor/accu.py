@@ -1,7 +1,7 @@
 from xarray import DataArray
 import xarray as xr
 
-def hourly_acc(da: DataArray) -> DataArray:
+def daily_to_hourly_acc(da: DataArray) -> DataArray:
     gpd = da.groupby("time.date")
     diff_da = xr.concat([
         gpd.first(keep_attrs=True).rename({"date" : "time"}),
