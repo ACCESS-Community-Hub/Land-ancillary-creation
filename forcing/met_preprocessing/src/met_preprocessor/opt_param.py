@@ -22,6 +22,11 @@ def calc_lwdown_swinbank(temperature):
 @preprocess_and_wrap(wrap_like="temperature", broadcast=("temperature", "elevation"))
 @check_units("[temperature]", "[length]")
 def calc_psurf(temperature, elevation):
+    """
+    CABLE 
+    commit: b8596c6143cce23d5d312a2070403fc949814e1d
+    location: src/offline/cable_input.F90#L1953
+    """
     t = temperature.to("kelvin").m
     e = elevation.to("m").m
     return (
@@ -38,6 +43,11 @@ def calc_snow(temperature, rain):
 
 def default_co2(coords, dims):
     # 350 ppm
+    """
+    CABLE
+    commit: b8596c6143cce23d5d312a2070403fc949814e1d 
+    location: src/offline#cable.nml#L32
+    """
     return xr.DataArray(
         350 / 1000000, coords=coords, dims=dims, attrs={"units": "ppm"}
     ).metpy.quantify()

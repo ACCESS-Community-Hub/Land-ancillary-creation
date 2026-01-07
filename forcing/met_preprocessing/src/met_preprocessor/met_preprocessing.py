@@ -83,9 +83,10 @@ def replace_tup(tup_list, val, new_tup):
 
 def order_load_dep(res, dependencies, input_list):
     """
-    Given a DAG, convert which order to calculate values.
+    Given a Directed Acyclic Graph, convert which order to calculate values.
     Eg: input_list = {1, 3}  dependencies = {2 : [[1, 4], [1, 3]], 4 : 1}
     Here answer should be {4 : [1] , 2 : [1, 4]} based on priority
+    TODO: Explain the example process step-by-step algorithmically
     """
     for param, dep_list in dependencies.items():
         for i, (deps, func) in enumerate(dep_list):
@@ -131,8 +132,8 @@ def run_met():
     dataset = xr.open_mfdataset(file_list, compat="override", coords="minimal")
     print("Loaded combined dataset")
 
-    # TODO: Remove after appropriate compression
-    # dataset = dataset.sel(time=slice("1950-01-01 00:00:00", "1950-01-01 23:59:59"))
+    # NOTE: Ideally remove after appropriate compression, otherwise can put in docs as WIP
+    dataset = dataset.sel(time=slice("1950-01-01 00:00:00", "1950-01-01 23:59:59"))
     print(dataset)
 
     # 1. Rename parameters
@@ -140,8 +141,6 @@ def run_met():
     dataset = dataset.rename(param_criteria)
 
     # 2. Hourly accumulator
-    dataset["Snowf"].attrs["units"] = "m"
-
 
     for v in config.get("hourly_acc"):
         dataset[v] = daily_to_hourly_acc(dataset[v])
