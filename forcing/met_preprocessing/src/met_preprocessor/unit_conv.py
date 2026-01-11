@@ -11,7 +11,6 @@ def rain_conversion(units: Unit, depth_time: Unit):
 
 
 class UnitConversion:
-
     def __init__(self, params: list[str]) -> None:
         self.contexts = {}
         self._add_unit_conversions(params)

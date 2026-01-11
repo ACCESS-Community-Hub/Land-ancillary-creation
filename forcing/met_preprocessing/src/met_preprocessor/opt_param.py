@@ -23,7 +23,7 @@ def calc_lwdown_swinbank(temperature):
 @check_units("[temperature]", "[length]")
 def calc_psurf(temperature, elevation):
     """
-    CABLE 
+    CABLE
     commit: b8596c6143cce23d5d312a2070403fc949814e1d
     location: src/offline/cable_input.F90#L1953
     """
@@ -45,7 +45,7 @@ def default_co2(coords, dims):
     # 350 ppm
     """
     CABLE
-    commit: b8596c6143cce23d5d312a2070403fc949814e1d 
+    commit: b8596c6143cce23d5d312a2070403fc949814e1d
     location: src/offline#cable.nml#L32
     """
     return xr.DataArray(
