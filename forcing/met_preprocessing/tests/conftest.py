@@ -3,8 +3,12 @@ import pandas as pd
 import xarray as xr
 import numpy as np
 import yaml
+from met_preprocessor.met_preprocessing import run_met
 
 TEST_PARAM_MAP_FILE = "tests/data/test_param_map.yaml"
+
+seed_value = 42
+rng = np.random.default_rng(seed=seed_value)
 
 
 @pytest.fixture(scope="module")
@@ -21,18 +25,30 @@ def param_map():
 
 @pytest.fixture(scope="module")
 def sample_xarray_data():
-    lon = [-99.83, -99.32]
-    lat = [42.25, 42.21]
-    time = pd.date_range("2024-09-06", periods=4)
-    temperature = 15 + 8 * np.random.randn(2, 2, 4)
-    rain = 500 + 1 * np.random.randn(2, 2, 4)
-    vpd = 15 + 8 * np.random.randn(2, 2, 4)
+    lon = [-99, -98.75]
+    lat = [42.25, 42.5]
+    time = pd.date_range("2024-09-06 01:00:00", periods=23, freq="h")
+
+    # Data Variables
+    temperature = 15 + 8 * np.random.randn(2, 2, 23)
+    rain = np.tile(np.arange(1, 24), (2, 2, 1))
+    shortwave_rad = np.tile(np.arange(1e5, 24e5, 1e5), (2, 2, 1))
+    longwave_rad = np.tile(np.arange(1e5, 24e5, 1e5), (2, 2, 1))
+    wind_u = np.full((2, 2, 23), 3)
+    wind_v = np.full((2, 2, 23), 4)
+    rain = np.tile(np.arange(1, 24), (2, 2, 1))
+    surf_pressure = 150 + 8 * np.random.randn(2, 2, 23)
+
     reference_time = pd.Timestamp("2014-09-05")
     ds = xr.Dataset(
         data_vars=dict(
-            Tair=(["lon", "lat", "time"], temperature, {"units": "celsius"}),
-            Rainf=(["lon", "lat", "time"], rain, {"units": "mm/month"}),
-            vpd=(["lon", "lat", "time"], vpd, {"units": "Pa"}),
+            ssrd=(["lon", "lat", "time"], shortwave_rad, {"units": "J m**-2"}), #SWDown
+            strd=(["lon", "lat", "time"], longwave_rad, {"units": "J m**-2"}), #LWDown
+            t2m=(["lon", "lat", "time"], temperature, {"units": "K"}), #Tair
+            tp=(["lon", "lat", "time"], rain, {"units": "mm"}), #Rainf
+            u10=(["lon", "lat", "time"], wind_u, {"units": "m s**-1"}), #Wind
+            v10=(["lon", "lat", "time"], wind_v, {"units": "m s**-1"}), #Wind
+            sp=(["lon", "lat", "time"], surf_pressure, {"units": "Pa"}), #PSurf
         ),
         coords=dict(
             lon=lon,
@@ -43,3 +59,7 @@ def sample_xarray_data():
         attrs=dict(description="Test dataset."),
     )
     return ds
+
+def test_sample_dataset(sample_xarray_data):
+    print(run_met(sample_xarray_data))
+    assert False

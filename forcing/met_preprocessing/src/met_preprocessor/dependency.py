@@ -52,7 +52,6 @@ def order_load_dep(res, dependencies, input_list):
     Given a Directed Acyclic Graph, convert which order to calculate values.
     Eg: input_list = {1, 3}  dependencies = {2 : [[1, 4], [1, 3]], 4 : 1}
     Here answer should be {4 : [1] , 2 : [1, 4]} based on priority
-    TODO: Explain the example process step-by-step algorithmically
     """
     for param, dep_list in dependencies.items():
         for i, (deps, func) in enumerate(dep_list):
@@ -74,5 +73,5 @@ def generate_calculations(dataset, param_map):
     }
     for node in pd.keys():
         if cycle_check(node, {}, is_cycle_chain):
-            raise Exception(f"Cycle detected near {node}")
+            raise Exception(f"Circular dependency detected near {node}")
     return order_load_dep([], pd, list(dataset.keys()) + ["none"])

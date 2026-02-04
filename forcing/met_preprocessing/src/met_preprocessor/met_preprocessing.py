@@ -35,7 +35,7 @@ with open(PARAM_MAP_FILE_NAME) as file:
     param_map = yaml.safe_load(file)
 
 
-def run_met():
+def run_met(dataset=None):
     """Run preprocessor for meteorological forcing dataset(s)."""
 
     with open(CONFIG_FILE_NAME) as file:
@@ -44,30 +44,30 @@ def run_met():
     with open(PARAM_MAP_FILE_NAME) as file:
         param_map = yaml.safe_load(file)
 
-    ## REVIEW: Have validator like cerberus
-    file_list = []
-    for dir in config.get("directories"):
-        file_list += list_nc_files(dir)
+    if dataset is None:
 
-    ## TODO: Have to differentiate output out by variables
-    ## TODO: Look more into parameter options for open_mfdataset
-    print("Loading combined dataset")
-    dataset = xr.open_mfdataset(file_list, compat="override", coords="minimal")
-    print("Loaded combined dataset")
+        ## REVIEW: Have validator like cerberus
+        file_list = []
+        for dir in config.get("directories"):
+            file_list += list_nc_files(dir)
 
-    # NOTE: Ideally remove after appropriate compression, otherwise can put in docs as WIP
-    dataset = dataset.sel(time=slice("1950-01-01 00:00:00", "1950-01-01 23:59:59"))
-    print(dataset)
+        ## TODO: Have to differentiate output out by variables
+        ## TODO: Look more into parameter options for open_mfdataset
+        print("Loading combined dataset")
+        dataset = xr.open_mfdataset(file_list, compat="override", coords="minimal")
+        print("Loaded combined dataset")
+
+        # NOTE: Ideally remove after appropriate compression, otherwise can put in docs as WIP
+        dataset = dataset.sel(time=slice("1950-01-01 00:00:00", "1950-01-01 23:59:59"))
+        print(dataset)
 
     # 1. Rename parameters
     param_criteria = get_rename_param_criteria(list(dataset.keys()), param_map)
     dataset = dataset.rename(param_criteria)
 
     # 2. Hourly accumulator
-
     for v in config.get("hourly_acc"):
         dataset[v] = daily_to_hourly_acc(dataset[v])
-
     # 3. Unit conversions
     ## List of all params for unit conversions
     params = get_unit_conv_params(param_map)
@@ -116,12 +116,15 @@ def run_met():
     compression_dict = {"zlib": True, "complevel": 5, "shuffle": True}
 
     print("Saving dataset")
+    print(dataset["time"])
     for var in dataset.data_vars:
         print(f"Saving var: {var}")
         dataset[var].encoding.update(compression_dict)
         dataset[var].to_netcdf(f"{config['output_file']}_{var}.nc", format="NETCDF4")
 
     print("Saved dataset - Check log.txt for warnings")
+
+    return dataset
 
 
 if __name__ == "__main__":
