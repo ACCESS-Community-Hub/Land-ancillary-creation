@@ -7,6 +7,7 @@ from met_preprocessor.met_preprocessing import run_met
 
 TEST_PARAM_MAP_FILE = "tests/data/test_param_map.yaml"
 
+# Receive consistent results with the test output file
 seed_value = 42
 rng = np.random.default_rng(seed=seed_value)
 
@@ -18,26 +19,24 @@ def param_map():
     return param_map
 
 
-# TODO: Add integration test for unchanged temp (have NetCDF)
 # TODO: Similar for leap year
 # TODO: Trusted short script for vpd / calc
-
 
 @pytest.fixture(scope="module")
 def sample_xarray_data():
     lon = [-99, -98.75]
     lat = [42.25, 42.5]
-    time = pd.date_range("2024-09-06 01:00:00", periods=23, freq="h")
+    time = pd.date_range("2024-09-06 00:00:00", periods=24, freq="h")
 
     # Data Variables
-    temperature = 15 + 8 * np.random.randn(2, 2, 23)
-    rain = np.tile(np.arange(1, 24), (2, 2, 1))
-    shortwave_rad = np.tile(np.arange(1e5, 24e5, 1e5), (2, 2, 1))
-    longwave_rad = np.tile(np.arange(1e5, 24e5, 1e5), (2, 2, 1))
-    wind_u = np.full((2, 2, 23), 3)
-    wind_v = np.full((2, 2, 23), 4)
-    rain = np.tile(np.arange(1, 24), (2, 2, 1))
-    surf_pressure = 150 + 8 * np.random.randn(2, 2, 23)
+    temperature = 15 + 8 * np.random.randn(2, 2, 24)
+    rain = np.tile(np.arange(1, 25), (2, 2, 1))
+    shortwave_rad = np.tile(np.arange(1e5, 25e5, 1e5), (2, 2, 1))
+    longwave_rad = np.tile(np.arange(1e5, 25e5, 1e5), (2, 2, 1))
+    wind_u = np.full((2, 2, 24), 3)
+    wind_v = np.full((2, 2, 24), 4)
+    rain = np.tile(np.arange(1, 25), (2, 2, 1))
+    surf_pressure = 150 + 8 * np.random.randn(2, 2, 24)
 
     reference_time = pd.Timestamp("2014-09-05")
     ds = xr.Dataset(
@@ -62,4 +61,3 @@ def sample_xarray_data():
 
 def test_sample_dataset(sample_xarray_data):
     print(run_met(sample_xarray_data))
-    assert False

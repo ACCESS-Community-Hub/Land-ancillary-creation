@@ -36,8 +36,8 @@ class TestDailyToHourlyAcc:
 
     def test_preserve_attribute(self, single_day_data):
         """Test basic daily to hourly accumulation conversion."""
-        test_attrs =  {"long_name": "RainFall", "units" : "mm hr**-1"}
-        single_day_data.attrs = test_attrs
+        single_day_data.attrs = {"long_name": "RainFall", "units" : "mm"}
         result = daily_to_hourly_acc(single_day_data)
+        expected_attrs = {"long_name": "RainFall", "units" : "mm hr**-1"}
 
-        assert result.attrs == test_attrs
+        assert result.attrs == expected_attrs
