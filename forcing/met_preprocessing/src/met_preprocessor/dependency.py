@@ -10,18 +10,21 @@ def process_dependencies(param_map):
     for param, param_info in param_map.items():
         ans = []
         for pi_calc in param_info.get("calc", []):
-            func = None
-            if param_info["type"] == "standard":
-                func = getattr(standard_param, pi_calc["func"])
-            elif param_info["type"] == "optional":
-                func = getattr(opt_param, pi_calc["func"])
-            else:
+            param_type = {
+                "standard" : standard_param,
+                "optional" : opt_param
+            }
+            try:
+                func = getattr(param_type[param_info["type"]], pi_calc["func"])
+            except KeyError:
                 raise Exception("Not yet defined for just conversion params")
+
             parsed_deps = pi_calc.get("deps", "").split(",")
             ans.append((parsed_deps, func))
         dependencies[param] = ans
 
     return dependencies
+
 
 
 def cycle_check(node: str, visited: dict[str, bool], adj_list: dict[str, list[str]]):

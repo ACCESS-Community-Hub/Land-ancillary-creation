@@ -50,4 +50,4 @@ def default_co2(coords, dims):
     """
     return xr.DataArray(
         350 / 1000000, coords=coords, dims=dims, attrs={"units": "ppm"}
-    ).metpy.quantify()
+    )

@@ -224,8 +224,8 @@ class TestOrderLoadDep:
         """Test ordering with linear dependency chain."""
         res = []
         dependencies = {
-            "A": [([["input1"]], lambda: None)],
-            "B": [([["A"]], lambda: None)],
+            "A": [(["input1"], lambda: None)],
+            "B": [(["A"], lambda: None)],
         }
         input_list = ["input1"]
 

@@ -59,5 +59,7 @@ def sample_xarray_data():
     )
     return ds
 
-def test_sample_dataset(sample_xarray_data):
-    print(run_met(sample_xarray_data))
+def test_sample_dataset():
+    test_dataset = xr.open_dataset("tests/data/test_input.nc")
+    expected_dataset = xr.open_dataset("tests/data/test_output.nc")
+    assert run_met(test_dataset).equals(expected_dataset)

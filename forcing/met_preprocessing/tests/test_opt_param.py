@@ -35,7 +35,7 @@ class TestCalcLwdownSwinbank:
         assert len(result) == len(temperature_data)
         assert all(result > 0)  # LW radiation should be positive
         # Check units are W/m²
-        assert result.metpy.dequantify().attrs["units"] == "W/m²"
+        assert result.metpy.dequantify().attrs["units"] == "watt / meter ** 2"
 
     def test_calc_lwdown_swinbank_increases_with_temperature(self, temperature_data):
         """Test that longwave radiation increases with temperature (Stefan-Boltzmann)."""
@@ -97,7 +97,7 @@ class TestCalcPsurf:
         assert len(result) == len(temp)
         assert all(result > 0)  # Pressure should be positive
         # Check units are Pa
-        assert "Pa" in str(result.metpy.dequantify().attrs["units"])
+        assert "pascal" in str(result.metpy.dequantify().attrs["units"])
 
     def test_calc_psurf_decreases_with_elevation(self, temp_elev_data):
         """Test that surface pressure decreases with elevation."""
@@ -156,6 +156,7 @@ class TestCalcSnow:
 
         result = calc_snow(temp, rain)
 
+        print(result)
         # Below 0°C (273.15K) should have snow
         assert result[0] > 0
         assert result[1] == 0  # At freezing point

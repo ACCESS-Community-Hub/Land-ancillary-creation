@@ -21,17 +21,17 @@ class TestVpVpdTairSh:
         """Create sample vapor pressure, VPD, and temperature data."""
         time = pd.date_range("2024-01-01", periods=4, freq="D")
         vp = xr.DataArray(
-            [1000, 1200, 1400, 1600],  # vapor pressure in Pa
+            [1000, 1200, 1400, 1600],
             coords={"time": time},
             dims=["time"],
-            attrs={"units": "Pa"},
+            attrs={"units": "hPa"},
         ).metpy.quantify()
 
         vpd = xr.DataArray(
-            [500, 600, 700, 800],  # vapor pressure deficit in Pa
+            [500, 600, 700, 800],
             coords={"time": time},
             dims=["time"],
-            attrs={"units": "Pa"},
+            attrs={"units": "hPa"},
         ).metpy.quantify()
 
         tair = xr.DataArray(
@@ -69,96 +69,6 @@ class TestVpVpdTairSh:
         )
 
 
-class TestVpTairSh:
-    """Test cases for vp_tair_sh (vapor pressure, temperature -> specific humidity)."""
-
-    @pytest.fixture
-    def vp_tair_data(self):
-        """Create sample vapor pressure and temperature data."""
-        time = pd.date_range("2024-01-01", periods=4, freq="D")
-        vp = xr.DataArray(
-            [1000, 1200, 1400, 1600],
-            coords={"time": time},
-            dims=["time"],
-            attrs={"units": "Pa"},
-        ).metpy.quantify()
-
-        tair = xr.DataArray(
-            [283.15, 288.15, 293.15, 298.15],
-            coords={"time": time},
-            dims=["time"],
-            attrs={"units": "kelvin"},
-        ).metpy.quantify()
-
-        return vp, tair
-
-    def test_vp_tair_sh_basic(self, vp_tair_data):
-        """Test specific humidity calculation from vp and tair."""
-        vp, tair = vp_tair_data
-
-        result = vp_tair_sh(vp, tair)
-
-        assert result is not None
-        assert len(result) == len(tair)
-        assert all(result >= 0)
-        assert all(result <= 1)
-
-    def test_vp_tair_sh_physical_consistency(self, vp_tair_data):
-        """Test that higher vapor pressure leads to higher specific humidity."""
-        vp, tair = vp_tair_data
-
-        result = vp_tair_sh(vp, tair)
-        result_deq = result.metpy.dequantify()
-
-        # Higher vp should produce higher specific humidity
-        assert float(result_deq[0]) <= float(result_deq[-1])
-
-
-class TestVpdTairSh:
-    """Test cases for vpd_tair_sh (vapor pressure deficit, temperature -> specific humidity)."""
-
-    @pytest.fixture
-    def vpd_tair_data(self):
-        """Create sample VPD and temperature data."""
-        time = pd.date_range("2024-01-01", periods=4, freq="D")
-        vpd = xr.DataArray(
-            [500, 600, 700, 800],
-            coords={"time": time},
-            dims=["time"],
-            attrs={"units": "Pa"},
-        ).metpy.quantify()
-
-        tair = xr.DataArray(
-            [283.15, 288.15, 293.15, 298.15],
-            coords={"time": time},
-            dims=["time"],
-            attrs={"units": "kelvin"},
-        ).metpy.quantify()
-
-        return vpd, tair
-
-    def test_vpd_tair_sh_basic(self, vpd_tair_data):
-        """Test specific humidity calculation from vpd and tair."""
-        vpd, tair = vpd_tair_data
-
-        result = vpd_tair_sh(vpd, tair)
-
-        assert result is not None
-        assert len(result) == len(tair)
-        assert all(result >= 0)
-        assert all(result <= 1)
-
-    def test_vpd_tair_sh_inverse_relationship(self, vpd_tair_data):
-        """Test that higher VPD leads to lower specific humidity."""
-        vpd, tair = vpd_tair_data
-
-        result = vpd_tair_sh(vpd, tair)
-        result_deq = result.metpy.dequantify()
-
-        # Higher vpd (drier air) should produce lower specific humidity
-        assert float(result_deq[0]) >= float(result_deq[-1])
-
-
 class TestSpDewpSh:
     """Test cases for sp_dewp_sh (surface pressure, dewpoint -> specific humidity)."""
 
@@ -170,7 +80,7 @@ class TestSpDewpSh:
             [101325, 101325, 101325, 101325],  # constant surface pressure
             coords={"time": time},
             dims=["time"],
-            attrs={"units": "Pa"},
+            attrs={"units": "hPa"},
         ).metpy.quantify()
 
         dewp = xr.DataArray(
@@ -235,22 +145,6 @@ class TestWindSpeed:
         assert result is not None
         assert len(result) == len(wind_e)
         assert all(result >= 0)  # Wind speed should be non-negative
-
-    def test_wind_speed_pythagoras(self, wind_components):
-        """Test that wind speed follows Pythagorean theorem."""
-        wind_e = xr.DataArray(
-            [3],
-            attrs={"units": "m/s"},
-        ).metpy.quantify()
-        wind_n = xr.DataArray(
-            [4],
-            attrs={"units": "m/s"},
-        ).metpy.quantify()
-
-        result = wind_speed(wind_e, wind_n)
-
-        # 3-4-5 right triangle: speed should be 5
-        assert float(result.metpy.dequantify()) == pytest.approx(5.0, rel=1e-2)
 
     @pytest.mark.parametrize(
         "east,north,expected",

@@ -37,10 +37,14 @@ def wind_speed(wind_e, wind_n):
 
 
 def _calc_sh(vp, svp, tair):
-    relative_humidity = vp / svp
+    relative_humidity = (vp / svp).to("dimensionless")
+    print(vp)
+    print(tair)
+    print(relative_humidity)
     mixing_ratio = mpcalc.mixing_ratio_from_relative_humidity(
-        vp, tair, relative_humidity
+        vp, tair, relative_humidity, phase='auto'
     )
+    print(mixing_ratio)
     specific_humidity = mpcalc.specific_humidity_from_mixing_ratio(mixing_ratio)
 
     return specific_humidity
